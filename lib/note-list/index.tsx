@@ -374,15 +374,11 @@ export class NoteList extends Component<Props> {
     window.removeEventListener('resize', this.recomputeHeights);
   }
 
-  handleShortcut = event => {
-    const { ctrlKey, key, metaKey, shiftKey } = event;
+  handleShortcut = (event: KeyboardEvent) => {
+    const { code, ctrlKey, metaKey, shiftKey } = event;
 
     const cmdOrCtrl = ctrlKey || metaKey;
-    if (
-      cmdOrCtrl &&
-      shiftKey &&
-      (key === 'ArrowUp' || key.toLowerCase() === 'k')
-    ) {
+    if (cmdOrCtrl && shiftKey && 'KeyK' === code) {
       this.props.onSelectNote(this.props.nextNote.id);
 
       event.stopPropagation();
@@ -390,11 +386,7 @@ export class NoteList extends Component<Props> {
       return false;
     }
 
-    if (
-      cmdOrCtrl &&
-      shiftKey &&
-      (key === 'ArrowDown' || key.toLowerCase() === 'j')
-    ) {
+    if (cmdOrCtrl && shiftKey && 'KeyJ' === code) {
       this.props.onSelectNote(this.props.prevNote.id);
 
       event.stopPropagation();
