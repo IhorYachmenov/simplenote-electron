@@ -98,7 +98,6 @@ export const middleware: S.Middleware = store => {
       case 'DELETE_NOTE_FOREVER':
       case 'RESTORE_NOTE':
       case 'TRASH_NOTE':
-      case 'App.trashNote':
         setFilteredNotes(updateFilter('fullSearch'), action.previousIndex);
         break;
 

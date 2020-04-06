@@ -95,7 +95,10 @@ export type ToggleEditMode = Action<'TOGGLE_EDIT_MODE'>;
 export type ToggleRevisions = Action<'REVISIONS_TOGGLE'>;
 export type ToggleTagDrawer = Action<'TAG_DRAWER_TOGGLE', { show: boolean }>;
 export type ToggleTagEditing = Action<'TAG_EDITING_TOGGLE'>;
-export type TrashNote = Action<'TRASH_NOTE', { previousIndex: number }>;
+export type TrashNote = Action<
+  'TRASH_NOTE',
+  { noteBucket: T.Bucket<T.Note>; note: T.NoteEntity; previousIndex: number }
+>;
 export type SelectNote = Action<
   'SELECT_NOTE',
   { note: T.NoteEntity; options?: { hasRemoteUpdate: boolean } }
@@ -196,14 +199,6 @@ type LegacyAction =
   | Action<
       'App.toggleShareAnalyticsPreference',
       { preferencesBucket: T.Bucket<T.Preferences> }
-    >
-  | Action<
-      'App.trashNote',
-      {
-        noteBucket: T.Bucket<T.Note>;
-        note: T.NoteEntity;
-        previousIndex: number;
-      }
     >
   | Action<'App.authChanged'>
   | Action<'App.emptyTrash', { noteBucket: T.Bucket<T.Note> }>
