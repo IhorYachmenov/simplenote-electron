@@ -13,15 +13,11 @@ export const middleware: S.Middleware = store => {
     port2: _searchProcessor,
   } = new MessageChannel();
 
-  const setFilteredNotes = (
-    noteIds: Set<T.EntityId>,
-    previousIndex?: number
-  ) => {
+  const setFilteredNotes = (noteIds: Set<T.EntityId>) => {
     const { appState } = store.getState();
     store.dispatch(
       actions.ui.filterNotes(
-        appState.notes?.filter(({ id }) => noteIds.has(id)) || emptyList,
-        previousIndex
+        appState.notes?.filter(({ id }) => noteIds.has(id)) || emptyList
       )
     );
   };
@@ -99,9 +95,6 @@ export const middleware: S.Middleware = store => {
       case 'RESTORE_NOTE':
       case 'TRASH_NOTE':
       case 'App.trashNote':
-        setFilteredNotes(updateFilter('fullSearch'), action.previousIndex);
-        break;
-
       case 'App.authChanged':
         setFilteredNotes(updateFilter('fullSearch'));
         break;

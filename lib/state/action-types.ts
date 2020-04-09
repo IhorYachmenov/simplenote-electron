@@ -50,20 +50,14 @@ export type SetWPToken = Action<'setWPToken', { token: string }>;
 export type CloseDialog = Action<'CLOSE_DIALOG'>;
 export type CloseNote = Action<'CLOSE_NOTE'>;
 export type CreateNote = Action<'CREATE_NOTE'>;
-export type DeleteNoteForever = Action<
-  'DELETE_NOTE_FOREVER',
-  { previousIndex: number }
->;
-export type FilterNotes = Action<
-  'FILTER_NOTES',
-  { notes: T.NoteEntity[]; previousIndex: number }
->;
+export type DeleteNoteForever = Action<'DELETE_NOTE_FOREVER'>;
+export type FilterNotes = Action<'FILTER_NOTES', { notes: T.NoteEntity[] }>;
 export type FocusSearchField = Action<'FOCUS_SEARCH_FIELD'>;
 export type RemoteNoteUpdate = Action<
   'REMOTE_NOTE_UPDATE',
   { noteId: T.EntityId; data: T.Note }
 >;
-export type RestoreNote = Action<'RESTORE_NOTE', { previousIndex: number }>;
+export type RestoreNote = Action<'RESTORE_NOTE'>;
 export type ShowDialog = Action<'SHOW_DIALOG', { dialog: T.DialogType }>;
 export type Search = Action<'SEARCH', { searchQuery: string }>;
 export type SelectRevision = Action<
@@ -95,7 +89,7 @@ export type ToggleEditMode = Action<'TOGGLE_EDIT_MODE'>;
 export type ToggleRevisions = Action<'REVISIONS_TOGGLE'>;
 export type ToggleTagDrawer = Action<'TAG_DRAWER_TOGGLE', { show: boolean }>;
 export type ToggleTagEditing = Action<'TAG_EDITING_TOGGLE'>;
-export type TrashNote = Action<'TRASH_NOTE', { previousIndex: number }>;
+export type TrashNote = Action<'TRASH_NOTE'>;
 export type SelectNote = Action<
   'SELECT_NOTE',
   { note: T.NoteEntity; options?: { hasRemoteUpdate: boolean } }
@@ -153,7 +147,6 @@ type LegacyAction =
       {
         noteBucket: T.Bucket<T.Note>;
         note: T.NoteEntity;
-        previousIndex: number;
       }
     >
   | Action<
@@ -182,7 +175,6 @@ type LegacyAction =
       {
         noteBucket: T.Bucket<T.Note>;
         note: T.NoteEntity;
-        previousIndex: number;
       }
     >
   | Action<
@@ -202,7 +194,6 @@ type LegacyAction =
       {
         noteBucket: T.Bucket<T.Note>;
         note: T.NoteEntity;
-        previousIndex: number;
       }
     >
   | Action<'App.authChanged'>

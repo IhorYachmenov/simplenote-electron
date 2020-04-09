@@ -176,7 +176,6 @@ export const actionMap = new ActionMap({
       creator({
         noteBucket,
         note,
-        previousIndex,
       }: {
         noteBucket: T.Bucket<T.Note>;
         note: T.NoteEntity;
@@ -185,7 +184,7 @@ export const actionMap = new ActionMap({
           if (note) {
             note.data.deleted = true;
             noteBucket.update(note.id, note.data);
-            dispatch(actions.ui.trashNote(previousIndex));
+            dispatch(actions.ui.trashNote());
           }
         };
       },
@@ -195,7 +194,6 @@ export const actionMap = new ActionMap({
       creator({
         noteBucket,
         note,
-        previousIndex,
       }: {
         noteBucket: T.Bucket<T.Note>;
         note: T.NoteEntity;
@@ -204,7 +202,7 @@ export const actionMap = new ActionMap({
           if (note) {
             note.data.deleted = false;
             noteBucket.update(note.id, note.data);
-            dispatch(actions.ui.restoreNote(previousIndex));
+            dispatch(actions.ui.restoreNote());
           }
         };
       },
@@ -214,7 +212,6 @@ export const actionMap = new ActionMap({
       creator({
         noteBucket,
         note,
-        previousIndex,
       }: {
         noteBucket: T.Bucket<T.Note>;
         note: T.NoteEntity;
@@ -222,7 +219,7 @@ export const actionMap = new ActionMap({
         return dispatch => {
           noteBucket.remove(note.id);
           dispatch(this.action('loadNotes', { noteBucket }));
-          dispatch(actions.ui.deleteNoteForever(previousIndex));
+          dispatch(actions.ui.deleteNoteForever());
         };
       },
     },
