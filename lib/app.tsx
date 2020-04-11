@@ -340,6 +340,8 @@ export const App = connect(
         ui: { note },
       } = this.props;
 
+      console.log('onNoteUpdate ' + noteId);
+
       this.props.remoteNoteUpdate(noteId, data);
 
       if (note && noteId === note.id) {

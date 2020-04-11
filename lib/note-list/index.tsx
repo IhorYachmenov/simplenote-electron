@@ -42,6 +42,7 @@ type StateProps = {
   hasLoaded: boolean;
   noteDisplay: T.ListDisplayMode;
   notes: T.NoteEntity[];
+  notesWithTagSuggestions: T.NoteEntity[];
   searchQuery: string;
   selectedNote: T.NoteEntity | null;
   selectedNoteContent: string;
@@ -333,14 +334,14 @@ export class NoteList extends Component<Props> {
   list = createRef();
 
   static propTypes = {
-    tagResultsFound: PropTypes.number.isRequired,
     isSmallScreen: PropTypes.bool.isRequired,
-    notes: PropTypes.array.isRequired,
-    onSelectNote: PropTypes.func.isRequired,
-    onPinNote: PropTypes.func.isRequired,
     noteDisplay: PropTypes.string.isRequired,
+    notesWithTagSuggestions: PropTypes.array.isRequired,
     onEmptyTrash: PropTypes.any.isRequired,
+    onPinNote: PropTypes.func.isRequired,
+    onSelectNote: PropTypes.func.isRequired,
     showTrash: PropTypes.bool,
+    tagResultsFound: PropTypes.number.isRequired,
   };
 
   componentDidMount() {
@@ -359,41 +360,51 @@ export class NoteList extends Component<Props> {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Readonly<Props>): void {
-    const { notes, selectedNote } = nextProps;
+    const { notes, selectedNote, showTrash } = nextProps;
     const {
       selected: { noteId, index },
     } = this.state;
 
-    if (index && selectedNote && notes[index].id === selectedNote.id) {
+    if (
+      index &&
+      selectedNote &&
+      index < notes.length &&
+      notes[index].id === selectedNote.id
+    ) {
       return;
     }
 
-    try {
-      const nextIndex = this.getHighlightedIndex(nextProps);
+    // try {
+    const nextIndex = this.getHighlightedIndex(nextProps);
 
-      if (null === nextIndex) {
-        return this.setState({
-          selected: { noteId: null, index: null },
-        });
-      }
-
-      !selectedNote && this.props.onSelectNote(notes[nextIndex].id);
-      this.setState({
-        selected: { noteId: notes[nextIndex].id, index: nextIndex },
+    if (null === nextIndex) {
+      return this.setState({
+        selected: { noteId: null, index: null },
       });
-    } catch (e) {
-      this.props.onSelectNote(notes[index].id);
-      this.setState({ selected: { noteId: notes[index].id, index } });
     }
+
+    if (!selectedNote || selectedNote.id !== notes[nextIndex].id) {
+      // select the note that should be selected, if it isn't already
+      this.props.onSelectNote(notes[nextIndex].id);
+    }
+
+    this.setState({
+      selected: { noteId: notes[nextIndex].id, index: nextIndex },
+    });
+    // } catch (e) {
+    // todo what case was this handling? it causes a crash when tag suggestions exist
+    // this.props.onSelectNote(notes[index].id);
+    // this.setState({ selected: { noteId: notes[index].id, index } });
+    // }
   }
 
   componentDidUpdate(prevProps) {
-    const { searchQuery, notes } = this.props;
+    const { searchQuery, notesWithTagSuggestions } = this.props;
 
     if (
       prevProps.searchQuery !== searchQuery ||
       prevProps.noteDisplay !== this.props.noteDisplay ||
-      prevProps.notes !== notes ||
+      prevProps.notesWithTagSuggestions !== notesWithTagSuggestions ||
       prevProps.selectedNoteContent !== this.props.selectedNoteContent
     ) {
       this.recomputeHeights();
@@ -412,18 +423,19 @@ export class NoteList extends Component<Props> {
       selected: { index },
     } = this.state;
 
+    const highlightedIndex = this.getHighlightedIndex(this.props);
+
     const cmdOrCtrl = ctrlKey || metaKey;
     if (
       cmdOrCtrl &&
       shiftKey &&
       (key === 'ArrowUp' || key.toLowerCase() === 'k')
     ) {
-      const highlightedIndex = this.getHighlightedIndex(this.props);
       if (-1 === highlightedIndex) {
         return true;
       }
 
-      if (index <= 0 || !notes[index - 1]?.id) {
+      if (index < 0 || !notes[index - 1]?.id) {
         return true;
       }
 
@@ -439,12 +451,11 @@ export class NoteList extends Component<Props> {
       shiftKey &&
       (key === 'ArrowDown' || key.toLowerCase() === 'j')
     ) {
-      const highlightedIndex = this.getHighlightedIndex(this.props);
       if (-1 === highlightedIndex) {
         return true;
       }
 
-      if (index >= notes.length - 1 || !notes[index + 1]?.id) {
+      if (index >= notes.length || !notes[index + 1]?.id) {
         return true;
       }
 
@@ -473,10 +484,15 @@ export class NoteList extends Component<Props> {
     } = this.state;
 
     // Cases:
+    //   - the notes list is empty
     //   - nothing has been selected -> select the first item if it exists
     //   - the selected note matches the index -> use the index
     //   - selected note is in the list -> use the index where it's found
     //   - selected note isn't in the list -> previous index?
+
+    if (notes.length === 0) {
+      return null;
+    }
 
     if (!selectedNote && !index) {
       const firstNote = notes.findIndex(item => item?.id);
@@ -495,7 +511,8 @@ export class NoteList extends Component<Props> {
     }
 
     if (selectedNote) {
-      throw new Error('selected note not in list');
+      return Math.min(index, notes.length - 1); // different note, same index
+      // throw new Error('selected note not in list');
     }
 
     // we have no selected note here, but we do have a previous index
@@ -504,32 +521,37 @@ export class NoteList extends Component<Props> {
 
   render() {
     const {
-      searchQuery,
       hasLoaded,
+      isSmallScreen,
+      noteDisplay,
+      notes,
+      notesWithTagSuggestions,
       onSelectNote,
       onEmptyTrash,
-      noteDisplay,
+      searchQuery,
       showTrash,
       tagResultsFound,
-      notes,
-      isSmallScreen,
     } = this.props;
     const {
       selected: { index: highlightedIndex },
     } = this.state;
 
+    // adjust the index to account for composite list headers
+    const specialRows = notesWithTagSuggestions.length - notes.length;
+
     const listItemsClasses = classNames('note-list-items', noteDisplay);
 
-    const renderNoteRow = renderNote(notes, {
+    const renderNoteRow = renderNote(notesWithTagSuggestions, {
       searchQuery,
       noteDisplay,
       onSelectNote,
       onPinNote: this.onPinNote,
-      highlightedIndex,
+      highlightedIndex:
+        highlightedIndex !== null ? highlightedIndex + specialRows : null,
       isSmallScreen,
     });
 
-    const isEmptyList = notes.length === 0;
+    const isEmptyList = notesWithTagSuggestions.length === 0;
 
     const emptyTrashButton = (
       <div className="note-list-empty-trash theme-color-border">
@@ -562,9 +584,9 @@ export class NoteList extends Component<Props> {
                     }
                     height={height}
                     noteDisplay={noteDisplay}
-                    notes={notes}
-                    rowCount={notes.length}
-                    rowHeight={getRowHeight(notes, {
+                    notes={notesWithTagSuggestions}
+                    rowCount={notesWithTagSuggestions.length}
+                    rowHeight={getRowHeight(notesWithTagSuggestions, {
                       searchQuery,
                       noteDisplay,
                       tagResultsFound,
@@ -595,7 +617,7 @@ const mapStateToProps: S.MapState<StateProps> = ({
   settings: { noteDisplay },
 }) => {
   const tagResultsFound = getMatchingTags(state.tags, searchQuery).length;
-  const compositeNoteList = createCompositeNoteList(
+  const notesWithTagSuggestions = createCompositeNoteList(
     filteredNotes,
     searchQuery,
     tagResultsFound
@@ -626,7 +648,8 @@ const mapStateToProps: S.MapState<StateProps> = ({
   return {
     hasLoaded: state.notes !== null,
     noteDisplay,
-    notes: compositeNoteList,
+    notes: filteredNotes,
+    notesWithTagSuggestions: notesWithTagSuggestions,
     searchQuery,
     selectedNote: note,
     selectedNotePreview,

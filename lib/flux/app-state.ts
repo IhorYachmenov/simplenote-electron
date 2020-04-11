@@ -133,6 +133,7 @@ export const actionMap = new ActionMap({
     loadAndSelectNote: {
       creator({ noteBucket, noteId, hasRemoteUpdate = false }) {
         return dispatch => {
+          console.log('load and select note called' + noteId);
           noteBucket.get(noteId, (e, note) => {
             dispatch(actions.ui.selectNote(note, { hasRemoteUpdate }));
           });
