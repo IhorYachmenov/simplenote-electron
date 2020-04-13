@@ -376,7 +376,6 @@ export class NoteList extends Component<Props> {
       return;
     }
 
-    // try {
     const nextIndex = this.getHighlightedIndex(nextProps);
 
     if (null === nextIndex) {
@@ -393,11 +392,6 @@ export class NoteList extends Component<Props> {
     this.setState({
       selected: { noteId: notes[nextIndex].id, index: nextIndex },
     });
-    // } catch (e) {
-    // todo what case was this handling? it causes a crash when tag suggestions exist
-    // this.props.onSelectNote(notes[index].id);
-    // this.setState({ selected: { noteId: notes[index].id, index } });
-    // }
   }
 
   componentDidUpdate(prevProps) {
