@@ -1,5 +1,5 @@
 import actions from '../state/actions';
-import { init, updateFilter } from './worker';
+import { init, updateFilter, updateNote } from './worker';
 
 import * as A from '../state/action-types';
 import * as S from '../state';
@@ -35,6 +35,7 @@ export const middleware: S.Middleware = store => {
   let hasInitialized = false;
 
   return next => (action: A.ActionType) => {
+    const prevState = store.getState();
     const result = next(action);
 
     switch (action.type) {
@@ -93,8 +94,22 @@ export const middleware: S.Middleware = store => {
 
       case 'DELETE_NOTE_FOREVER':
       case 'RESTORE_NOTE':
+        updateNote(prevState.ui.note.id, {
+          ...prevState.ui.note.data,
+          deleted: false,
+        });
+        setFilteredNotes(updateFilter('fullSearch'));
+        break;
+
       case 'TRASH_NOTE':
       case 'App.trashNote':
+        updateNote(prevState.ui.note.id, {
+          ...prevState.ui.note.data,
+          deleted: true,
+        });
+        setFilteredNotes(updateFilter('fullSearch'));
+        break;
+
       case 'App.authChanged':
         setFilteredNotes(updateFilter('fullSearch'));
         break;

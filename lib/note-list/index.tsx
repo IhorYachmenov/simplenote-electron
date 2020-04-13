@@ -43,6 +43,7 @@ type StateProps = {
   noteDisplay: T.ListDisplayMode;
   notes: T.NoteEntity[];
   notesWithTagSuggestions: T.NoteEntity[];
+  openedTag: T.TagEntity | null;
   searchQuery: string;
   selectedNote: T.NoteEntity | null;
   selectedNoteContent: string;
@@ -360,7 +361,7 @@ export class NoteList extends Component<Props> {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: Readonly<Props>): void {
-    const { notes, selectedNote, showTrash } = nextProps;
+    const { notes, openedTag, selectedNote, showTrash } = nextProps;
     const {
       selected: { noteId, index },
     } = this.state;
@@ -368,8 +369,9 @@ export class NoteList extends Component<Props> {
     if (
       index &&
       selectedNote &&
-      index < notes.length &&
-      notes[index].id === selectedNote.id
+      notes[index]?.id === selectedNote.id &&
+      showTrash === this.props.showTrash &&
+      openedTag === this.props.openedTag
     ) {
       return;
     }
@@ -613,7 +615,7 @@ const { emptyTrash, loadAndSelectNote } = appState.actionCreators;
 
 const mapStateToProps: S.MapState<StateProps> = ({
   appState: state,
-  ui: { filteredNotes, note, searchQuery, showTrash },
+  ui: { filteredNotes, note, openedTag, searchQuery, showTrash },
   settings: { noteDisplay },
 }) => {
   const tagResultsFound = getMatchingTags(state.tags, searchQuery).length;
@@ -650,6 +652,7 @@ const mapStateToProps: S.MapState<StateProps> = ({
     noteDisplay,
     notes: filteredNotes,
     notesWithTagSuggestions: notesWithTagSuggestions,
+    openedTag,
     searchQuery,
     selectedNote: note,
     selectedNotePreview,

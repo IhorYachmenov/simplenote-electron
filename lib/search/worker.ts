@@ -92,6 +92,18 @@ const queueUpdateFilter = (
   }, delay);
 };
 
+export const updateNote = (noteId, data) => {
+  const noteTags = new Set(data.tags.map(tag => tag.toLocaleLowerCase()));
+  notes.set(noteId, [
+    noteId,
+    {
+      ...data,
+      content: data.content.toLocaleLowerCase(),
+      tags: noteTags,
+    },
+  ]);
+};
+
 export const init = (port: MessagePort) => {
   mainApp = port;
 
@@ -99,16 +111,7 @@ export const init = (port: MessagePort) => {
     if (event.data.action === 'updateNote') {
       const { noteId, data } = event.data;
 
-      const noteTags = new Set(data.tags.map(tag => tag.toLocaleLowerCase()));
-      notes.set(noteId, [
-        noteId,
-        {
-          ...data,
-          content: data.content.toLocaleLowerCase(),
-          tags: noteTags,
-        },
-      ]);
-
+      updateNote(noteId, data);
       queueUpdateFilter(1000);
     } else if (event.data.action === 'filterNotes') {
       if ('string' === typeof event.data.searchQuery) {
